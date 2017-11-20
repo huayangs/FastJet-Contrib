@@ -1,0 +1,59 @@
+Description:
+
+- Intro:
+
+This is the fastjet plugin designed to implement the Qjet pruning algorithm (arXiv: 1201.1914, 
+Phys.Rev.Lett. 108 (2012) 182003).  If fastjet is installed, all one should need to do is type 
+"make".  An example of code employing the plugin is included in the example.cc file.  To run the 
+example type something like
+ 
+./example sample_data/ww_1.txt sample_output/ww_1_out.txt
+
+where sample_data/ww_1.txt contains a set of calorimeter cells.  The file 
+sample_output/ww_1_out.txt will contain a list of pruned jet masses. See 
+sample_output/plotter.nb for sample plots made with the data.
+
+For more information on fastjet, see http://fastjet.fr/
+
+- Random number seeding:
+
+To generate reproducible plugin sequences with the plugin you can seed the 
+algorithm as follows:
+
+	  unsigned int rand_seed = 0;
+
+	  for(unsigned int i = 0 ; i < 1000 ; i++){
+	  	       QjetsPlugin qjet_plugin(zcut, dcut_fctr, exp_min, exp_max, rigidity);
+		       qjet_plugin.SetRandSeed(rand_r(&rand_seed));
+ 		       fastjet::JetDefinition qjet_def(&qjet_plugin);
+
+    		       fastjet::ClusterSequence qjet_seq(constits, qjet_def);
+		        //... do something with the jets
+	  }		
+
+- Truncated clustering:
+
+For some applications the Qjets plugin may be too slow.  This is particularly true for
+applications involving ghost particles.  To fix this, rather than considering every possible 
+merging at each stage in the clustering procedure one can only consider the mergings with 
+some probability above a given threshold.  To set this threshold, one can set a truncation
+factor in the constructor of the Qjets plugin:
+
+     QjetsPlugin(double zcut, 
+     			double dcut_fctr, 
+			double exp_min, 
+			double exp_max, 
+			double rigidity, 
+			double truncation_fctr);
+
+For instance, setting truncation_fctr = 0.1 means that no mergings will be considered whose 
+probability exceeds 10%.  In practice, we find that setting truncation_fctr=0.01 yields a substantial 
+improvement in the speed of the computation with only minor quantitative changes in the results.
+
+Contact:
+
+Stephen D. Ellis [sdellis@u.washington.edu]
+Andrew Hornig [ahornig@u.washington.edu] 
+David Krohn [dkrohn@gmail.com]
+Tuhin S. Roy [tuhin@u.washington.edu]
+Matthew D. Schwartz [schwartz@physics.harvard.edu]
